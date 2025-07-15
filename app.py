@@ -5,22 +5,30 @@ import requests
 API_URL = "https://api-inference.huggingface.co/models/bigcode/santacoder"
 HF_TOKEN = st.secrets["HF_TOKEN"]  # Secure token from Streamlit secrets
 
+import streamlit as st
+import requests
+import time
+
+# Hugging Face API setup
+API_URL = "https://api-inference.huggingface.co/models/bigcode/santacoder"
+HF_TOKEN = st.secrets["HF_TOKEN"]
+
 def query(prompt):
     headers = {"Authorization": f"Bearer {HF_TOKEN}"}
     payload = {
         "inputs": prompt,
-        "parameters": {
-            "max_new_tokens": 150,
-            "temperature": 0.5
-        }
+        "parameters": {"max_new_tokens": 150, "temperature": 0.5}
     }
-
-    response = requests.post(API_URL, headers=headers, json=payload)
     
-    try:
-        return response.json()
-    except requests.exceptions.JSONDecodeError:
-        return {"error": "❌ Model returned invalid response. Please wait and try again."}
+    # Try up to 3 times with delays
+    for attempt in range(3):
+        response = requests.post(API_URL, headers=headers, json=payload)
+        try:
+            return response.json()
+        except requests.exceptions.JSONDecodeError:
+            time.sleep(5)  # wait before retrying
+    return {"error": "Model is still loading or unavailable — please wait a bit and try again."}
+
 
 # Streamlit UI
 st.set_page_config(page_title="Code Assistant", page_icon="🤖")
@@ -43,7 +51,8 @@ if st.button("Submit"):
 
             if "error" in result:
                 st.error(result["error"])
+            if "error" in result:
+                st.error(result["error"])
             else:
-                generated = result[0].get("generated_text", "No response received.")
-                st.success("✅ AI Response:")
+                generated = result[0].get("generated_text", "No output received.")
                 st.code(generated, language="python")
