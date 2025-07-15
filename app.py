@@ -1,10 +1,8 @@
 import streamlit as st
 import openai
 
-# Set your API key (stored securely in secrets)
 openai.api_key = st.secrets["OPENAI_API_KEY"]
 
-# UI
 st.set_page_config(page_title="Code Assistant", page_icon="🤖")
 st.title("🤖 OpenAI-Powered Code Assistant")
 
@@ -16,17 +14,13 @@ if st.button("Submit"):
         st.warning("⚠️ Please paste some code.")
     else:
         with st.spinner("Asking OpenAI..."):
-            # Prompt construction
-            if task == "Explain code":
-                prompt = f"Explain what the following Python code does:\n{code_input}"
-            else:
-                prompt = f"Continue this Python code:\n{code_input}"
+            prompt = f"Explain what the following Python code does:\n{code_input}" if task == "Explain code" else f"Continue this Python code:\n{code_input}"
 
             try:
                 response = openai.ChatCompletion.create(
                     model="gpt-3.5-turbo",
                     messages=[
-                        {"role": "system", "content": "You are a helpful assistant for code learning."},
+                        {"role": "system", "content": "You are a helpful coding assistant."},
                         {"role": "user", "content": prompt}
                     ],
                     temperature=0.5,
@@ -35,6 +29,5 @@ if st.button("Submit"):
                 result = response['choices'][0]['message']['content']
                 st.success("✅ AI Response:")
                 st.code(result, language="python")
-
             except openai.error.OpenAIError as e:
                 st.error(f"❌ OpenAI API error: {e}")
