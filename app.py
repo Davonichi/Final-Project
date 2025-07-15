@@ -1,18 +1,26 @@
 import streamlit as st
 import openai
 
-# Set up OpenAI API key securely
+# Set your API key
 openai.api_key = st.secrets["OPENAI_API_KEY"]
 
-# Streamlit page config
+# Page config
 st.set_page_config(page_title="AI Code Learning Assistant", page_icon="💡")
 st.title("💡 AI Code Learning Assistant")
-st.caption("Powered by OpenAI | Built for SDG 4: Quality Education")
+st.caption("Supports Python, JavaScript, Java, HTML, C++, SQL, and more")
 
-# Sidebar navigation
+# Supported languages
+languages = [
+    "Python", "JavaScript", "Java", "C++", "HTML", "CSS", "SQL", "PHP", "Dart", "R"
+]
+
+# Sidebar tabs
 tab = st.sidebar.radio("Choose a feature", ["Code Explainer", "Debugging Assistant", "Quiz Generator", "Career Guidance"])
 
-# Unified function to ask OpenAI
+# Language selector
+language = st.selectbox("Select your programming language", languages)
+
+# Unified AI query function
 def ask_openai(prompt):
     try:
         response = openai.ChatCompletion.create(
@@ -26,54 +34,54 @@ def ask_openai(prompt):
         )
         return response['choices'][0]['message']['content']
     except Exception as e:
-        return f"⚠️ Error: {e}"
+        return f"⚠️ OpenAI API Error: {e}"
 
-# Tab 1: Code Explainer
+# Code Explainer
 if tab == "Code Explainer":
     st.header("🔍 Explain Your Code")
-    code = st.text_area("Paste your Python code below", height=200)
+    code = st.text_area(f"Paste your {language} code below", height=200)
     if st.button("Explain"):
         if code.strip():
-            prompt = f"Explain what this Python code does:\n{code}"
+            prompt = f"Explain this {language} code to a beginner:\n{code}"
             explanation = ask_openai(prompt)
             st.success("AI Explanation:")
-            st.code(explanation, language="markdown")
+            st.code(explanation)
         else:
-            st.warning("Please enter some code.")
+            st.warning("Please paste some code.")
 
-# Tab 2: Debugging Assistant
+# Debugging Assistant
 elif tab == "Debugging Assistant":
     st.header("🐞 Debug Your Code")
-    code = st.text_area("Paste your buggy Python code below", height=200)
+    code = st.text_area(f"Paste your buggy {language} code below", height=200)
     if st.button("Fix"):
         if code.strip():
-            prompt = f"This Python code has a bug. Fix it and explain the fix:\n{code}"
+            prompt = f"This {language} code has a bug. Fix it and explain the fix:\n{code}"
             result = ask_openai(prompt)
             st.success("AI Fix + Explanation:")
-            st.code(result, language="python")
+            st.code(result)
         else:
             st.warning("Please paste code to debug.")
 
-# Tab 3: Quiz Generator
+# Quiz Generator
 elif tab == "Quiz Generator":
-    st.header("📄 Generate a Coding Quiz")
-    topic = st.text_input("Enter a coding topic (e.g. 'Python lists')")
+    st.header("📄 Generate a Quiz")
+    topic = st.text_input(f"Enter a topic in {language} (e.g. functions, loops)")
     if st.button("Generate Quiz"):
         if topic.strip():
-            prompt = f"Create a short quiz (3 questions with answers) for a beginner learning {topic}."
+            prompt = f"Create a 3-question multiple choice quiz with answers on the topic '{topic}' in {language}."
             quiz = ask_openai(prompt)
             st.success("Quiz:")
             st.markdown(quiz)
         else:
             st.warning("Please enter a topic.")
 
-# Tab 4: Career Guidance
+# Career Guidance
 elif tab == "Career Guidance":
     st.header("🎓 Career Learning Paths")
-    role = st.text_input("What role are you interested in? (e.g. Mobile Developer, Web Developer)")
-    if st.button("Get Path"):
+    role = st.text_input("What coding career are you interested in? (e.g. Web Developer, Data Scientist)")
+    if st.button("Get Learning Path"):
         if role.strip():
-            prompt = f"Give me a step-by-step learning roadmap to become a {role}. Include tools and online resources."
+            prompt = f"Give me a step-by-step learning roadmap to become a {role}. Include tools and resources."
             roadmap = ask_openai(prompt)
             st.success(f"Learning Path for {role}:")
             st.markdown(roadmap)
