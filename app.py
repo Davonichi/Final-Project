@@ -8,13 +8,14 @@ openai.api_key = st.secrets["OPENAI_API_KEY"]
 st.set_page_config(page_title="AI Code Learning Assistant", page_icon="💡")
 st.title("💡 AI Code Learning Assistant")
 
-# 👉 Enable code wrapping
+# 🔹 Word wrap fix for long code blocks
 st.markdown("""
 <style>
-    pre code {
-        white-space: pre-wrap;
-        word-break: break-word;
-    }
+  pre code {
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow-x: auto;
+  }
 </style>
 """, unsafe_allow_html=True)
 
@@ -62,7 +63,7 @@ if tab == "Code Explainer":
 
 # Debugging Assistant
 elif tab == "Debugging Assistant":
-    st.header("🐞 Debug Your Code")
+    st.header("🔎 Debug Your Code")
     code = st.text_area(f"Paste your buggy {language} code below", height=200)
     if st.button("Fix"):
         if code.strip():
