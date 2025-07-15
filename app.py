@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 
 # Load your .env file
 load_dotenv()
-openai.api_key = st.getenv("OPENAI_API_KEY")
+openai.api_key = st.secrets("OPENAI_API_KEY")
 
 # Set up Streamlit
 st.set_page_config(page_title="AI Code Assistant", page_icon="🤖")
