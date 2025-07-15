@@ -7,6 +7,17 @@ openai.api_key = st.secrets["OPENAI_API_KEY"]
 # Page config
 st.set_page_config(page_title="AI Code Learning Assistant", page_icon="💡")
 st.title("💡 AI Code Learning Assistant")
+
+# 👉 Enable code wrapping
+st.markdown("""
+<style>
+    pre code {
+        white-space: pre-wrap;
+        word-break: break-word;
+    }
+</style>
+""", unsafe_allow_html=True)
+
 st.caption("Supports Python, JavaScript, Java, HTML, C++, SQL, and more")
 
 # Supported languages
