@@ -57,7 +57,7 @@ if tab == "Code Explainer":
             prompt = f"Explain this {language} code to a beginner:\n{code}"
             explanation = ask_openai(prompt)
             st.success("AI Explanation:")
-            st.code(explanation)
+            st.markdown(explanation)  # ✅ updated for better wrapping
         else:
             st.warning("Please paste some code.")
 
@@ -70,9 +70,10 @@ elif tab == "Debugging Assistant":
             prompt = f"This {language} code has a bug. Fix it and explain the fix:\n{code}"
             result = ask_openai(prompt)
             st.success("AI Fix + Explanation:")
-            st.code(result)
+            st.markdown(result)  # ✅ updated for wrapping
         else:
             st.warning("Please paste code to debug.")
+
 
 # Quiz Generator
 elif tab == "Quiz Generator":
