@@ -27,7 +27,14 @@ languages = [
 ]
 
 # Sidebar tabs
-tab = st.sidebar.radio("Choose a feature", ["Code Explainer", "Debugging Assistant", "Quiz Generator", "Career Guidance"])
+tab = st.sidebar.radio("Choose a feature", [
+    "Code Explainer",
+    "Debugging Assistant",
+    "Quiz Generator",
+    "Career Guidance",
+    "Mini Lessons"  # ✅ Added new section
+])
+
 
 # Language selector
 language = st.selectbox("Select your programming language", languages)
@@ -100,3 +107,21 @@ elif tab == "Career Guidance":
             st.markdown(roadmap)
         else:
             st.warning("Please enter a role.")
+
+# 📚 Mini Lessons
+elif tab == "Mini Lessons":
+    st.header("📚 Mini Lessons")
+    st.caption("Learn quick concepts in Python, HTML, SQL, JavaScript, C++, and more!")
+
+    lesson_language = st.selectbox("Choose a language", languages)
+    lesson_topic = st.text_input("What concept or topic do you want to learn about?")
+    
+    if st.button("Teach Me"):
+        if lesson_topic.strip():
+            prompt = f"Give a short, beginner-friendly explanation (in 3-5 sentences) about '{lesson_topic}' in {lesson_language}."
+            lesson = ask_openai(prompt)
+            st.success("🧠 Micro Lesson:")
+            st.markdown(lesson)
+        else:
+            st.warning("Please enter a topic.")
+
