@@ -1,50 +1,40 @@
 import streamlit as st
-import requests
-import time
+import openai
 
-# Use CodeGen 350M Mono from Hugging Face (faster)
-API_URL = "https://api-inference.huggingface.co/models/Salesforce/codegen-350M-mono"
-HF_TOKEN = st.secrets["HF_TOKEN"]  # Stored in Streamlit Secrets
+# Set your API key (stored securely in secrets)
+openai.api_key = st.secrets["OPENAI_API_KEY"]
 
-def query_model(prompt):
-    headers = {
-        "Authorization": f"Bearer {HF_TOKEN}"
-    }
-    payload = {
-        "inputs": prompt,
-        "parameters": {
-            "max_new_tokens": 150,
-            "temperature": 0.5
-        }
-    }
-
-    for attempt in range(3):  # Retry up to 3 times
-        response = requests.post(API_URL, headers=headers, json=payload)
-        try:
-            return response.json()
-        except requests.exceptions.JSONDecodeError:
-            time.sleep(5)
-
-    return {"error": "Model is still warming up. Please try again after 60 seconds."}
-
-# Streamlit App UI
+# UI
 st.set_page_config(page_title="Code Assistant", page_icon="🤖")
-st.title("🤖 Hugging Face Code Assistant (CodeGen 350M)")
+st.title("🤖 OpenAI-Powered Code Assistant")
 
 task = st.selectbox("Choose a task", ["Explain code", "Complete code"])
-code_input = st.text_area("Paste your Python code here", height=200)
+code_input = st.text_area("Paste your Python code below 👇", height=200)
 
 if st.button("Submit"):
     if not code_input.strip():
         st.warning("⚠️ Please paste some code.")
     else:
-        with st.spinner("Calling CodeGen..."):
-            prompt = f"# Python code explanation:\n{code_input}" if task == "Explain code" else code_input
-            result = query_model(prompt)
-
-            if "error" in result:
-                st.error(result["error"])
+        with st.spinner("Asking OpenAI..."):
+            # Prompt construction
+            if task == "Explain code":
+                prompt = f"Explain what the following Python code does:\n{code_input}"
             else:
-                output = result[0].get("generated_text", "No output received.")
+                prompt = f"Continue this Python code:\n{code_input}"
+
+            try:
+                response = openai.ChatCompletion.create(
+                    model="gpt-3.5-turbo",
+                    messages=[
+                        {"role": "system", "content": "You are a helpful assistant for code learning."},
+                        {"role": "user", "content": prompt}
+                    ],
+                    temperature=0.5,
+                    max_tokens=300
+                )
+                result = response['choices'][0]['message']['content']
                 st.success("✅ AI Response:")
-                st.code(output, language="python")
+                st.code(result, language="python")
+
+            except openai.error.OpenAIError as e:
+                st.error(f"❌ OpenAI API error: {e}")
