@@ -1,8 +1,5 @@
 import streamlit as st
-import openai
-
-# Set your API key
-openai.api_key = st.secrets["OPENAI_API_KEY"]
+import requests
 
 # Page config
 st.set_page_config(page_title="AI Code Learning Assistant", page_icon="💡")
@@ -32,28 +29,40 @@ tab = st.sidebar.radio("Choose a feature", [
     "Debugging Assistant",
     "Quiz Generator",
     "Career Guidance",
-    "Mini Lessons"  # ✅ Added new section
+    "Mini Lessons"
 ])
-
 
 # Language selector
 language = st.selectbox("Select your programming language", languages)
 
-# Unified AI query function
-def ask_openai(prompt):
+# Deepseek API function
+def ask_deepseek(prompt):
     try:
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=[
+        # Deepseek API endpoint (replace with actual endpoint if different)
+        url = "https://api.deepseek.com/v1/chat/completions"
+        
+        # Your Deepseek API key from Streamlit secrets
+        headers = {
+            "Authorization": f"Bearer {st.secrets['sk-b8d553064b1843a3b90888d5c74f7e5d']}",
+            "Content-Type": "application/json"
+        }
+        
+        payload = {
+            "model": "deepseek-chat",  # or the specific model you want to use
+            "messages": [
                 {"role": "system", "content": "You are a helpful coding tutor for beginners."},
                 {"role": "user", "content": prompt}
             ],
-            temperature=0.5,
-            max_tokens=500
-        )
-        return response['choices'][0]['message']['content']
+            "temperature": 0.5,
+            "max_tokens": 2000  # Deepseek typically allows more tokens
+        }
+        
+        response = requests.post(url, headers=headers, json=payload)
+        response.raise_for_status()
+        
+        return response.json()['choices'][0]['message']['content']
     except Exception as e:
-        return f"⚠️ OpenAI API Error: {e}"
+        return f"⚠️ API Error: {str(e)}"
 
 # Code Explainer
 if tab == "Code Explainer":
@@ -61,10 +70,11 @@ if tab == "Code Explainer":
     code = st.text_area(f"Paste your {language} code below", height=200)
     if st.button("Explain"):
         if code.strip():
-            prompt = f"Explain this {language} code to a beginner:\n{code}"
-            explanation = ask_openai(prompt)
-            st.success("AI Explanation:")
-            st.markdown(explanation)  # ✅ updated for better wrapping
+            with st.spinner("Generating explanation..."):
+                prompt = f"Explain this {language} code to a beginner:\n{code}"
+                explanation = ask_deepseek(prompt)
+                st.success("AI Explanation:")
+                st.markdown(explanation)
         else:
             st.warning("Please paste some code.")
 
@@ -74,13 +84,13 @@ elif tab == "Debugging Assistant":
     code = st.text_area(f"Paste your buggy {language} code below", height=200)
     if st.button("Fix"):
         if code.strip():
-            prompt = f"This {language} code has a bug. Fix it and explain the fix:\n{code}"
-            result = ask_openai(prompt)
-            st.success("AI Fix + Explanation:")
-            st.markdown(result)  # ✅ updated for wrapping
+            with st.spinner("Analyzing and fixing..."):
+                prompt = f"This {language} code has a bug. Fix it and explain the fix:\n{code}"
+                result = ask_deepseek(prompt)
+                st.success("AI Fix + Explanation:")
+                st.markdown(result)
         else:
             st.warning("Please paste code to debug.")
-
 
 # Quiz Generator
 elif tab == "Quiz Generator":
@@ -88,10 +98,11 @@ elif tab == "Quiz Generator":
     topic = st.text_input(f"Enter a topic in {language} (e.g. functions, loops)")
     if st.button("Generate Quiz"):
         if topic.strip():
-            prompt = f"Create a 3-question multiple choice quiz with answers on the topic '{topic}' in {language}."
-            quiz = ask_openai(prompt)
-            st.success("Quiz:")
-            st.markdown(quiz)
+            with st.spinner("Creating quiz..."):
+                prompt = f"Create a 3-question multiple choice quiz with answers on the topic '{topic}' in {language}."
+                quiz = ask_deepseek(prompt)
+                st.success("Quiz:")
+                st.markdown(quiz)
         else:
             st.warning("Please enter a topic.")
 
@@ -101,14 +112,15 @@ elif tab == "Career Guidance":
     role = st.text_input("What coding career are you interested in? (e.g. Web Developer, Data Scientist)")
     if st.button("Get Learning Path"):
         if role.strip():
-            prompt = f"Give me a step-by-step learning roadmap to become a {role}. Include tools and resources."
-            roadmap = ask_openai(prompt)
-            st.success(f"Learning Path for {role}:")
-            st.markdown(roadmap)
+            with st.spinner("Generating roadmap..."):
+                prompt = f"Give me a step-by-step learning roadmap to become a {role}. Include tools and resources."
+                roadmap = ask_deepseek(prompt)
+                st.success(f"Learning Path for {role}:")
+                st.markdown(roadmap)
         else:
             st.warning("Please enter a role.")
 
-# 📚 Mini Lessons
+# Mini Lessons
 elif tab == "Mini Lessons":
     st.header("📚 Mini Lessons")
     st.caption("Learn quick concepts in Python, HTML, SQL, JavaScript, C++, and more!")
@@ -118,10 +130,10 @@ elif tab == "Mini Lessons":
     
     if st.button("Teach Me"):
         if lesson_topic.strip():
-            prompt = f"Give a short, beginner-friendly explanation (in 3-5 sentences) about '{lesson_topic}' in {lesson_language}."
-            lesson = ask_openai(prompt)
-            st.success("🧠 Micro Lesson:")
-            st.markdown(lesson)
+            with st.spinner("Preparing lesson..."):
+                prompt = f"Give a short, beginner-friendly explanation (in 3-5 sentences) about '{lesson_topic}' in {lesson_language}."
+                lesson = ask_deepseek(prompt)
+                st.success("🧠 Micro Lesson:")
+                st.markdown(lesson)
         else:
             st.warning("Please enter a topic.")
-
