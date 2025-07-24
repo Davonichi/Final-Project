@@ -1,4 +1,5 @@
 import streamlit as st
+import transformer
 from transformers import AutoModelForCausalLM, AutoTokenizer
 import torch
 import socket
