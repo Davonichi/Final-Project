@@ -1,18 +1,29 @@
+# --- PATCH TORCH TO AVOID STREAMLIT WATCHER CRASH ---
+import types
+import torch
+if not hasattr(torch.classes, '__path__'):
+    torch.classes.__path__ = types.SimpleNamespace(_path=[])
+
+# --- ENVIRONMENT ---
+import os
+os.environ["STREAMLIT_WATCH_USE_POLLING"] = "true"
+
+# --- MAIN IMPORTS ---
 import streamlit as st
 from transformers import AutoModelForCausalLM, AutoTokenizer
-import torch
 import socket
 
+# --- NETWORK CHECK ---
 try:
     socket.gethostbyname("huggingface.co")
     print("DNS resolved successfully.")
 except socket.gaierror:
     print("DNS resolution failed.")
 
-# --- CONFIG & THEME ---
+# --- PAGE CONFIG ---
 st.set_page_config(page_title="AI Code Learning Assistant", layout="wide")
 
-# Auto theme detection
+# --- THEME SETUP ---
 auto_theme_js = """
 <script>
     const darkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -21,10 +32,8 @@ auto_theme_js = """
 """
 st.components.v1.html(auto_theme_js)
 
-def set_theme_if_not_set():
-    if "dark_mode" not in st.session_state:
-        st.session_state.dark_mode = False
-set_theme_if_not_set()
+if "dark_mode" not in st.session_state:
+    st.session_state.dark_mode = False
 
 st.sidebar.title("🌓 Theme")
 manual_toggle = st.sidebar.checkbox("Enable Dark Mode", value=st.session_state.dark_mode)
@@ -49,11 +58,11 @@ custom_css = """
 if st.session_state.dark_mode:
     st.markdown(custom_css, unsafe_allow_html=True)
 
-# --- TITLE ---
+# --- HEADER ---
 st.title("AI Code Tutor")
 st.markdown("Helping African learners unlock coding skills with AI ✨")
 
-# --- SIDEBAR NAVIGATION ---
+# --- SIDEBAR NAV ---
 st.sidebar.title("Features")
 feature = st.sidebar.radio("Choose a feature:", [
     "Code Explainer",
@@ -63,7 +72,7 @@ feature = st.sidebar.radio("Choose a feature:", [
     "Career Guide"
 ])
 
-# --- LOAD DIALOGPT MODEL ---
+# --- LOAD TRANSFORMERS MODEL ---
 @st.cache_resource
 def load_model():
     tokenizer = AutoTokenizer.from_pretrained("microsoft/phi-2")
@@ -134,3 +143,4 @@ elif feature == "Career Guide":
 # --- FOOTER ---
 st.markdown("---")
 st.markdown("Empowering Next Generation of Developers in Africa 🌍 | © 2025 CodeTutor")
+
