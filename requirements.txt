@@ -1,11 +1,8 @@
-streamlit
-openai==0.28
-python-dotenv
-transformers
-types
-torch
-os 
-socket
+streamlit>=1.33.0
+transformers>=4.40.0
+torch>=2.2.0
+safetensors>=0.4.0
+accelerate>=0.24.1
 
 
 
