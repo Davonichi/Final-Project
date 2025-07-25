@@ -1,6 +1,11 @@
 streamlit
 openai==0.28
 python-dotenv
+transformers
+types
+torch
+os 
+socket
 
 
 
