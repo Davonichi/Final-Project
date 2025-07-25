@@ -1,636 +1,97 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>💬 AI Code Learning Assistant</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&family=Fira+Code:wght@400&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --primary: #4361ee;
-      --primary-light: #4895ef;
-      --secondary: #3f37c9;
-      --accent: #f72585;
-      --success: #4cc9f0;
-      --warning: #f8961e;
-      --danger: #ef233c;
-      
-      --bg-color: #f8f9fa;
-      --card-bg: #ffffff;
-      --text-color: #2b2d42;
-      --text-muted: #6c757d;
-      --border-color: #e9ecef;
-      
-      --user-bg: #e0f7fa;
-      --user-text: #006064;
-      --bot-bg: #f8f9fe;
-      --bot-text: #3f37c9;
-      
-      --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
-      --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
-      --shadow-lg: 0 10px 25px rgba(0,0,0,0.1);
-      
-      --radius-sm: 8px;
-      --radius-md: 12px;
-      --radius-lg: 16px;
-      
-      --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    }
-
-    body.dark {
-      --primary: #4895ef;
-      --primary-light: #4361ee;
-      --secondary: #4cc9f0;
-      --accent: #f72585;
-      
-      --bg-color: #121212;
-      --card-bg: #1e1e1e;
-      --text-color: #e9ecef;
-      --text-muted: #adb5bd;
-      --border-color: #2b2d42;
-      
-      --user-bg: #004d40;
-      --user-text: #b2dfdb;
-      --bot-bg: #263238;
-      --bot-text: #81d4fa;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      margin: 0;
-      font-family: 'Poppins', sans-serif;
-      background: var(--bg-color);
-      color: var(--text-color);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      transition: var(--transition);
-      line-height: 1.6;
-    }
-
-    .chat-container {
-      width: 100%;
-      max-width: 800px;
-      height: 90vh;
-      max-height: 900px;
-      background: var(--card-bg);
-      border-radius: var(--radius-lg);
-      box-shadow: var(--shadow-lg);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      transition: var(--transition);
-      border: 1px solid var(--border-color);
-    }
-
-    .header {
-      padding: 18px 24px;
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
-      color: white;
-      font-weight: 600;
-      font-size: 18px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: var(--shadow-sm);
-      position: relative;
-      z-index: 10;
-    }
-
-    .header::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 4px;
-      background: linear-gradient(90deg, var(--accent), var(--success));
-      opacity: 0.8;
-    }
-
-    .messages {
-      flex: 1;
-      overflow-y: auto;
-      padding: 20px;
-      background-color: var(--card-bg);
-      background-image: radial-gradient(var(--border-color) 1px, transparent 1px);
-      background-size: 20px 20px;
-    }
-
-    .message {
-      margin: 12px 0;
-      padding: 14px 18px;
-      border-radius: var(--radius-md);
-      max-width: 85%;
-      word-wrap: break-word;
-      white-space: pre-wrap;
-      box-shadow: var(--shadow-sm);
-      position: relative;
-      opacity: 0;
-      transform: translateY(10px);
-      animation: fadeIn 0.3s ease-out forwards;
-      transition: var(--transition);
-    }
-
-    @keyframes fadeIn {
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    .user {
-      align-self: flex-end;
-      background: var(--user-bg);
-      color: var(--user-text);
-      border-bottom-right-radius: 4px;
-    }
-
-    .user::before {
-      content: '';
-      position: absolute;
-      right: -8px;
-      top: 0;
-      border-width: 0 8px 12px 0;
-      border-style: solid;
-      border-color: transparent var(--user-bg) transparent transparent;
-    }
-
-    .bot {
-      align-self: flex-start;
-      background: var(--bot-bg);
-      color: var(--bot-text);
-      border-bottom-left-radius: 4px;
-    }
-
-    .bot::before {
-      content: '';
-      position: absolute;
-      left: -8px;
-      top: 0;
-      border-width: 0 0 12px 8px;
-      border-style: solid;
-      border-color: transparent transparent transparent var(--bot-bg);
-    }
-
-    .message strong {
-      font-weight: 600;
-      display: block;
-      margin-bottom: 6px;
-      color: var(--primary);
-    }
-
-    .input-section {
-      display: flex;
-      padding: 16px;
-      border-top: 1px solid var(--border-color);
-      gap: 12px;
-      flex-wrap: wrap;
-      background: var(--card-bg);
-      position: relative;
-    }
-
-    input[type="text"], select {
-      flex: 1;
-      padding: 12px 16px;
-      border: 2px solid var(--border-color);
-      border-radius: var(--radius-md);
-      font-size: 16px;
-      background: var(--card-bg);
-      color: var(--text-color);
-      transition: var(--transition);
-      min-width: 200px;
-    }
-
-    input[type="text"]:focus, select:focus {
-      outline: none;
-      border-color: var(--primary-light);
-      box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
-    }
-
-    select {
-      appearance: none;
-      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-      background-repeat: no-repeat;
-      background-position: right 12px center;
-      background-size: 16px;
-      padding-right: 36px;
-      cursor: pointer;
-    }
-
-    button {
-      background: var(--primary);
-      color: white;
-      border: none;
-      padding: 12px 20px;
-      border-radius: var(--radius-md);
-      font-size: 16px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: var(--transition);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    button:hover {
-      background: var(--secondary);
-      transform: translateY(-1px);
-      box-shadow: var(--shadow-md);
-    }
-
-    button:active {
-      transform: translateY(0);
-    }
-
-    .toggle-btn {
-      background: rgba(255, 255, 255, 0.1);
-      color: white;
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      border-radius: var(--radius-sm);
-      padding: 6px 12px;
-      cursor: pointer;
-      font-size: 14px;
-      transition: var(--transition);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .toggle-btn:hover {
-      background: rgba(255, 255, 255, 0.2);
-    }
-
-    pre {
-      background: rgba(0, 0, 0, 0.1);
-      padding: 14px;
-      overflow-x: auto;
-      border-radius: var(--radius-sm);
-      font-family: 'Fira Code', monospace;
-      font-size: 14px;
-      line-height: 1.5;
-      margin: 10px 0;
-      position: relative;
-      border-left: 3px solid var(--primary);
-    }
-
-    .dark pre {
-      background: rgba(0, 0, 0, 0.3);
-    }
-
-    .suggestions {
-      padding: 12px 16px;
-      font-size: 14px;
-      background: var(--card-bg);
-      border-top: 1px solid var(--border-color);
-    }
-
-    .suggestions strong {
-      color: var(--primary);
-      margin-right: 8px;
-    }
-
-    .suggestion {
-      cursor: pointer;
-      color: var(--primary-light);
-      margin-right: 12px;
-      white-space: nowrap;
-      display: inline-block;
-      padding: 4px 8px;
-      border-radius: 20px;
-      background: rgba(67, 97, 238, 0.1);
-      transition: var(--transition);
-    }
-
-    .suggestion:hover {
-      background: rgba(67, 97, 238, 0.2);
-      transform: translateY(-1px);
-    }
-
-    .suggestion::before {
-      content: '👉 ';
-    }
-
-    .typing-indicator {
-      display: flex;
-      padding: 8px 0;
-    }
-
-    .typing-dot {
-      width: 8px;
-      height: 8px;
-      background-color: var(--text-muted);
-      border-radius: 50%;
-      margin-right: 4px;
-      animation: typingAnimation 1.4s infinite ease-in-out;
-    }
-
-    .typing-dot:nth-child(1) { animation-delay: 0s; }
-    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
-    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
-
-    @keyframes typingAnimation {
-      0%, 60%, 100% { transform: translateY(0); }
-      30% { transform: translateY(-5px); }
-    }
-
-    .copy-btn {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      background: rgba(255, 255, 255, 0.2);
-      border: none;
-      border-radius: 4px;
-      padding: 4px 8px;
-      font-size: 12px;
-      cursor: pointer;
-      color: var(--text-color);
-      transition: var(--transition);
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .copy-btn:hover {
-      background: rgba(255, 255, 255, 0.3);
-    }
-
-    .mode-selector {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 12px;
-      flex-wrap: wrap;
-    }
-
-    .mode-btn {
-      padding: 8px 16px;
-      border-radius: 20px;
-      font-size: 14px;
-      background: rgba(67, 97, 238, 0.1);
-      color: var(--primary);
-      border: none;
-      cursor: pointer;
-      transition: var(--transition);
-    }
-
-    .mode-btn.active {
-      background: var(--primary);
-      color: white;
-    }
-
-    .mode-btn:hover {
-      background: rgba(67, 97, 238, 0.2);
-    }
-
-    @media (max-width: 768px) {
-      .chat-container {
-        height: 100vh;
-        max-height: none;
-        border-radius: 0;
-      }
-      
-      .message {
-        max-width: 90%;
-      }
-      
-      .input-section {
-        flex-direction: column;
-      }
-      
-      button {
-        width: 100%;
-        justify-content: center;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <title>AI Code Tutor</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: "Segoe UI", sans-serif;
+            background-color: #0e1117;
+            color: #FAFAFA;
+            padding: 2rem;
+        }
+        h1 {
+            color: #4CAF50;
+        }
+        label, select, textarea, button {
+            display: block;
+            width: 100%;
+            margin-top: 1rem;
+            font-size: 1rem;
+        }
+        textarea {
+            height: 150px;
+            background-color: #262730;
+            color: #FAFAFA;
+            border: 1px solid #444;
+            padding: 1rem;
+            resize: vertical;
+        }
+        select, button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 0.6rem;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #response {
+            margin-top: 2rem;
+            padding: 1rem;
+            background-color: #1c1f26;
+            border-left: 4px solid #4CAF50;
+            white-space: pre-wrap;
+        }
+    </style>
 </head>
 <body>
-  <div class="chat-container">
-    <div class="header">
-      <span>💬 AI Code Learning Assistant</span>
-      <button class="toggle-btn" onclick="toggleTheme()">
-        <span class="theme-icon">🌙</span> 
-        <span class="theme-text">Dark Mode</span>
-      </button>
-    </div>
+    <h1>🌍 AI Code Tutor</h1>
+    <p>Helping African learners unlock coding skills with AI ✨</p>
 
-    <div id="chat" class="messages">
-      <div class="message bot" style="opacity: 1; transform: none;">
-        <strong>Bot:</strong> 
-        <p>Hello! I'm your AI Code Learning Assistant. How can I help you today?</p>
-        <p>Choose a mode or ask me anything about programming:</p>
-        <div class="mode-selector">
-          <button class="mode-btn active" data-mode="lesson">📚 Mini Lesson</button>
-          <button class="mode-btn" data-mode="bugfix">🐛 Bug Fix</button>
-          <button class="mode-btn" data-mode="quiz">🧠 Quiz</button>
-          <button class="mode-btn" data-mode="general">💡 General</button>
-        </div>
-      </div>
-    </div>
+    <label for="mode">Select a feature:</label>
+    <select id="mode">
+        <option value="explain">Code Explainer</option>
+        <option value="debug">Debugging Assistant</option>
+        <option value="lesson">Mini Lessons</option>
+        <option value="quiz">Quiz Generator</option>
+        <option value="career">Career Guide</option>
+    </select>
 
-    <div class="suggestions">
-      <strong>💡 Try:</strong>
-      <span class="suggestion" onclick="quickPrompt('Explain Python functions with examples')">Python functions</span>
-      <span class="suggestion" onclick="quickPrompt('Fix this React component error')">React error</span>
-      <span class="suggestion" onclick="quickPrompt('Give me a JavaScript array challenge')">JS challenge</span>
-      <span class="suggestion" onclick="quickPrompt('How do I center a div in CSS?')">CSS centering</span>
-    </div>
+    <label for="prompt">Your input:</label>
+    <textarea id="prompt" placeholder="Paste code or enter a topic/question..."></textarea>
 
-    <div class="input-section">
-      <select id="mode">
-        <option value="lesson">📚 Mini Lesson</option>
-        <option value="bugfix">🐛 Bug Fix</option>
-        <option value="quiz">🧠 Quiz</option>
-        <option value="general">💡 General</option>
-      </select>
-      <input type="text" id="prompt" placeholder="Ask about programming concepts, bugs, or request quizzes..." autocomplete="off">
-      <button onclick="askBot()">
-        <span class="send-icon">🚀</span>
-        <span class="send-text">Send</span>
-      </button>
-    </div>
-  </div>
+    <button onclick="sendPrompt()">Submit</button>
 
-  <script>
-    function toggleTheme() {
-      document.body.classList.toggle("dark");
-      const icon = document.querySelector('.theme-icon');
-      const text = document.querySelector('.theme-text');
-      if (document.body.classList.contains('dark')) {
-        icon.textContent = '☀️';
-        text.textContent = 'Light Mode';
-      } else {
-        icon.textContent = '🌙';
-        text.textContent = 'Dark Mode';
-      }
-    }
+    <div id="response"></div>
 
-    // Set initial mode buttons active state
-    document.addEventListener('DOMContentLoaded', function() {
-      const modeButtons = document.querySelectorAll('.mode-btn');
-      modeButtons.forEach(button => {
-        button.addEventListener('click', function() {
-          // Update active state
-          modeButtons.forEach(btn => btn.classList.remove('active'));
-          this.classList.add('active');
-          
-          // Update select dropdown
-          const mode = this.dataset.mode;
-          document.getElementById('mode').value = mode;
-        });
-      });
-      
-      // Focus input on load
-      document.getElementById('prompt').focus();
-    });
+    <script>
+        async function sendPrompt() {
+            const prompt = document.getElementById("prompt").value.trim();
+            const mode = document.getElementById("mode").value;
+            const responseDiv = document.getElementById("response");
 
-    function quickPrompt(text) {
-      const input = document.getElementById('prompt');
-      input.value = text;
-      input.focus();
-    }
+            if (!prompt) {
+                responseDiv.innerText = "❗ Please enter something first.";
+                return;
+            }
 
-    function formatResponse(text) {
-      // Format code blocks
-      text = text.replace(/```(\w+)?\n([\s\S]*?)```/g, (match, lang, code) => {
-        const escaped = code.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-        return `
-          <div style="position: relative; margin: 10px 0;">
-            <button class="copy-btn" onclick="copyCode(this)">
-              <span class="copy-icon">📋</span>
-              <span class="copy-text">Copy</span>
-            </button>
-            <pre><code class="language-${lang || ''}">${escaped}</code></pre>
-          </div>
-        `;
-      });
-      
-      // Format lists
-      text = text.replace(/^\s*-\s(.+)$/gm, '<li>$1</li>');
-      text = text.replace(/(<li>.*<\/li>)+/g, '<ul>$&</ul>');
-      
-      return text;
-    }
+            responseDiv.innerText = "⏳ Thinking...";
 
-    function copyCode(btn) {
-      const code = btn.parentNode.querySelector('code').textContent;
-      navigator.clipboard.writeText(code).then(() => {
-        const icon = btn.querySelector('.copy-icon');
-        const text = btn.querySelector('.copy-text');
-        icon.textContent = "✅";
-        text.textContent = "Copied!";
-        setTimeout(() => {
-          icon.textContent = "📋";
-          text.textContent = "Copy";
-        }, 2000);
-      });
-    }
-
-    function createTypingIndicator() {
-      const indicator = document.createElement('div');
-      indicator.className = 'typing-indicator';
-      indicator.innerHTML = `
-        <div class="typing-dot"></div>
-        <div class="typing-dot"></div>
-        <div class="typing-dot"></div>
-      `;
-      return indicator;
-    }
-
-    async function askBot() {
-      const input = document.getElementById("prompt");
-      const chat = document.getElementById("chat");
-      const mode = document.getElementById("mode").value;
-      const prompt = input.value.trim();
-      if (!prompt) return;
-
-      // Add user message
-      const userMsg = document.createElement("div");
-      userMsg.className = "message user";
-      userMsg.innerHTML = `<strong>You:</strong> ${prompt.replace(/</g, "&lt;").replace(/>/g, "&gt;")}`;
-      chat.appendChild(userMsg);
-
-      // Add typing indicator
-      const typingIndicator = document.createElement("div");
-      typingIndicator.className = "message bot";
-      typingIndicator.id = "typing-indicator";
-      typingIndicator.appendChild(createTypingIndicator());
-      chat.appendChild(typingIndicator);
-      
-      // Scroll to bottom
-      chat.scrollTop = chat.scrollHeight;
-      input.value = "";
-
-      // Simulate API call (replace with actual fetch in production)
-      setTimeout(() => {
-        document.getElementById("typing-indicator").remove();
-        
-        // This is a mock response - replace with actual API call
-        const mockResponses = {
-          lesson: `Here's a mini-lesson about <strong>${prompt}</strong>:\n\n` +
-                  `In programming, ${prompt.toLowerCase()} is a fundamental concept. For example:\n\n` +
-                  "```python\ndef example_function(param):\n    \"\"\"This demonstrates ${prompt}\"\"\"\n    return param * 2\n```\n\n" +
-                  "Key points to remember:\n- Always document your code\n- Keep functions small and focused\n- Use descriptive names",
-          bugfix: `To fix <strong>${prompt}</strong>, try these steps:\n\n` +
-                  "1. Check for syntax errors\n2. Verify variable names\n3. Use debugger tools\n\n" +
-                  "Common solution:\n```javascript\n// Before:\nfunction buggy() { return x + 1 }\n\n" +
-                  "// After:\nfunction fixed(x) { return x + 1 }\n```",
-          quiz: `Here's a quiz about <strong>${prompt}</strong>:\n\n` +
-                "Question: What does the following code output?\n\n" +
-                "```python\nprint([x*2 for x in range(5)])\n```\n\n" +
-                "Options:\nA) [0, 1, 2, 3, 4]\nB) [0, 2, 4, 6, 8]\nC) Error\n\n" +
-                "Answer: B) [0, 2, 4, 6, 8]",
-          general: `Regarding <strong>${prompt}</strong>:\n\n` +
-                  "This is a general programming concept that applies to many languages. " +
-                  "The exact implementation may vary, but the core idea remains the same."
-        };
-        
-        const reply = document.createElement("div");
-        reply.className = "message bot";
-        reply.innerHTML = `<strong>Bot:</strong> ${formatResponse(mockResponses[mode] || mockResponses.general)}`;
-        chat.appendChild(reply);
-        chat.scrollTop = chat.scrollHeight;
-      }, 1500);
-      
-      // In production, you would use:
-      /*
-      try {
-        const res = await fetch("/ask", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ prompt, mode })
-        });
-
-        const data = await res.json();
-        document.getElementById("typing-indicator").remove();
-
-        const reply = document.createElement("div");
-        reply.className = "message bot";
-        reply.innerHTML = `<strong>Bot:</strong> ${formatResponse(data.reply)}`;
-        chat.appendChild(reply);
-        chat.scrollTop = chat.scrollHeight;
-      } catch (error) {
-        document.getElementById("typing-indicator").remove();
-        const errorMsg = document.createElement("div");
-        errorMsg.className = "message bot";
-        errorMsg.innerHTML = `<strong>Bot:</strong> ❌ Error reaching server. Please try again.`;
-        chat.appendChild(errorMsg);
-      }
-      */
-    }
-    
-    // Allow sending message with Enter key
-    document.getElementById('prompt').addEventListener('keypress', function(e) {
-      if (e.key === 'Enter') {
-        askBot();
-      }
-    });
-  </script>
+            try {
+                const response = await fetch("/chat", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ prompt, mode })
+                });
+                const data = await response.json();
+                responseDiv.innerText = data.reply;
+            } catch (error) {
+                responseDiv.innerText = "❌ Error: " + error.message;
+            }
+        }
+    </script>
 </body>
 </html>
